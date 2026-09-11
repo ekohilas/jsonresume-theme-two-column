@@ -1,0 +1,456 @@
+/*
+ * jsonresume-theme-two-column
+ *
+ * A port of the two-column-cv LaTeX class (twocolumncv.cls / .sty) to CSS.
+ * Everything is expressed in points, because the original is: A4 with 5mm
+ * margins, a 24mm full-bleed masthead, and two 272pt columns separated by 8mm.
+ *
+ * Vertical rhythm follows the LaTeX font commands, which pair a size with a
+ * baseline skip: body 11/12, heading 12/13, section 15/15, title 38/38.
+ *
+ * The gaps below were measured off a reference mdcv.pdf rather than derived
+ * from \titlespacing, because TeX positions a baseline where CSS positions a
+ * line box, and Chromium rounds painted positions to whole device pixels
+ * (0.75pt) on the way out. Everything lands within about a point of the
+ * original; change a value and re-render before trusting it.
+ */
+
+:root {
+  /* Palette — mirrors the \definecolor block in twocolumncv.sty. */
+  --header-color: #eeeeee;
+  --title-color: #26ad60;
+  --subtitle-color: #888888;
+  --details-color: #000000;
+  --section-color: #26ad60;
+  --heading-color: #26ad60;
+  --subheading-color: #000000;
+  --date-color: #888888;
+  --text-color: #888888;
+  --link-color: #888888;
+
+  /* \displayfont, \bodyfont, \monofont */
+  --display-font: 'Oswald', 'Oswald Regular', 'Bebas Neue', sans-serif;
+  --body-font: 'DejaVu Serif Condensed', 'DejaVu Serif', Georgia, serif;
+  --mono-font: 'DejaVu Sans Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* \geometry */
+  --page-width: 210mm;
+  --page-height: 297mm;
+  --page-margin: 5mm;
+  --column-gap: 8mm;
+  --header-height: 24mm;
+  --page-foot: 3mm;
+  --column-height: calc(
+    var(--page-height) - var(--header-height) - var(--masthead-gap) -
+      var(--page-foot)
+  );
+
+  /* Type scale. TeX measures points as 1/72.27in and PDF/CSS as 1/72in, so
+     every size from the .sty file is scaled to land on the same glyph widths
+     the LaTeX original produced. */
+  --tex-pt: 0.996264;
+  --title-size: calc(38 * var(--tex-pt) * 1pt);
+  --subtitle-size: calc(13 * var(--tex-pt) * 1pt);
+  --section-size: calc(15 * var(--tex-pt) * 1pt);
+  --heading-size: calc(12 * var(--tex-pt) * 1pt);
+  --body-size: calc(11 * var(--tex-pt) * 1pt);
+  --link-size: calc(10 * var(--tex-pt) * 1pt);
+  --body-leading: calc(12 * var(--tex-pt) * 1pt);
+  --heading-leading: calc(13 * var(--tex-pt) * 1pt);
+  --link-leading: calc(11 * var(--tex-pt) * 1pt);
+
+  /* Distance from a line box's top to the top of its capitals. Oswald's line
+     boxes are taller than its capitals, so these are what let a CSS block be
+     positioned where TeX would have put the baseline. */
+  --section-ink: 2.13pt;
+  --masthead-gap: 12.5pt;
+  --title-top: 12.93pt;
+
+  /* Indents: subheadings sit 1em of the heading size in, body text 1em of
+     its own size, with a further half-em of paragraph indent. */
+  --subheading-indent: calc(12 * var(--tex-pt) * 1pt);
+  --text-indent: calc(11 * var(--tex-pt) * 1pt);
+  --paragraph-indent: calc(5.5 * var(--tex-pt) * 1pt);
+
+  /* Spacing */
+  --section-gap: 15.3pt;
+  --entry-gap: 9.6pt;
+  --section-entry-gap: 9.0pt;
+  --paragraph-gap: 2.3pt;
+  --row-gap: 3.4pt;
+  --rows-gap: 4pt;
+  --link-gap: 3pt;
+  /* Chromium snaps painted edges to whole device pixels on the way to PDF, so
+     a 1pt rule lands on one pixel or two depending on where it falls. An exact
+     pixel is a hair thin next to the LaTeX hairline, but it is the same hair
+     for every section. */
+  --rule-thickness: 1px;
+  /* TeX shrinks interword glue by up to a third of a space to keep a line
+     from breaking; CSS has no equivalent, so a uniform sliver comes off every
+     space instead. Without it the tightest lines wrap where mdcv does not. */
+  --word-shrink: -0.0079em;
+  --rule-inset: 6.9pt;
+}
+
+/* --------------------------------------------------------------- reset -- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* ----------------------------------------------------------- structure -- */
+
+body {
+  font: var(--body-size) / var(--body-leading) var(--body-font);
+  color: var(--text-color);
+  /* \defaultfontfeatures{Ligatures=TeX}: ff/fi/fl are set as ligatures, and
+     line breaking depends on it — "returning offer." only fits because of it. */
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
+  word-spacing: var(--word-shrink);
+  text-rendering: geometricPrecision;
+}
+
+/* The page itself carries no side margins: the masthead has to bleed to the
+   paper edge, and Chromium clips anything printed into a @page margin box. */
+.resume {
+  padding: 0 var(--page-margin);
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12pt;
+  height: var(--header-height);
+  margin: 0 calc(-1 * var(--page-margin)) var(--masthead-gap);
+  padding: 0 var(--page-margin);
+  background: var(--header-color);
+  overflow: hidden;
+}
+
+/* column-fill: auto fills the left column to the foot of the page before
+   starting the right one, the way \twocolumn does; in print the page supplies
+   the height, and anything that does not fit spills onto the next page. */
+.columns {
+  column-count: 2;
+  column-gap: var(--column-gap);
+  column-fill: auto;
+  orphans: 2;
+  widows: 2;
+}
+
+/* ------------------------------------------------------------ masthead -- */
+
+.identity {
+  align-self: flex-start;
+  min-width: 0;
+  margin-top: var(--title-top);
+}
+
+.identity__name {
+  font: var(--title-size) / var(--title-size) var(--display-font);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: var(--title-color);
+  white-space: nowrap;
+}
+
+.identity__label {
+  /* \thinspace before \subtitlefont, then \\[0.2ex] after the name. */
+  margin-top: 0.54pt;
+  margin-left: 1.7pt;
+  font-size: var(--subtitle-size);
+  line-height: var(--heading-leading);
+  color: var(--subtitle-color);
+}
+
+/* Hangs a little above the middle of the band, as the TikZ details node does.
+   The offset and any size reduction are computed from the number of lines in
+   src/render.js; the fallbacks here are the four-line case. */
+.contacts {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: var(--details-top, 7.4pt);
+  font-family: var(--mono-font);
+  font-size: var(--details-size, 11pt);
+  line-height: var(--details-leading, 12pt);
+  color: var(--details-color);
+  text-align: right;
+}
+
+.contact {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5pt;
+  white-space: nowrap;
+}
+
+.contact__icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1em;
+  margin-bottom: 0.8pt;
+  text-align: center;
+}
+
+.icon {
+  width: auto;
+  height: 0.82em;
+  max-width: 100%;
+  fill: currentColor;
+}
+
+/* ------------------------------------------------------------- section -- */
+
+/* Positive, so that it is truncated at a column break and both columns start
+   their first section flush with the top of the text block. */
+.section {
+  margin-top: var(--section-gap);
+  break-inside: auto;
+}
+
+.columns > :first-child {
+  margin-top: 0;
+}
+
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: var(--rule-inset);
+  font: var(--section-size) / var(--section-size) var(--display-font);
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--section-color);
+  break-after: avoid;
+}
+
+.section__title::before,
+.section__title::after {
+  content: '';
+  flex: 1 1 0;
+  height: var(--rule-thickness);
+  background: currentColor;
+  /* Centre the rule on the capitals rather than on the line box. */
+  transform: translateY(0.7pt);
+}
+
+.section__label {
+  letter-spacing: 0.05em;
+  margin-right: -0.05em;
+}
+
+/* --------------------------------------------------------------- entry -- */
+
+.entry {
+  margin-top: var(--entry-gap);
+  break-inside: avoid;
+}
+
+.section__title + .entry {
+  margin-top: var(--section-entry-gap);
+}
+
+.entry__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6pt;
+}
+
+.entry__heading {
+  font-size: var(--heading-size);
+  line-height: var(--heading-leading);
+  font-weight: 400;
+  color: var(--heading-color);
+}
+
+.entry__date {
+  flex: 0 0 auto;
+  color: var(--date-color);
+  white-space: nowrap;
+}
+
+.role__title {
+  margin: var(--paragraph-gap) 0;
+  margin-left: var(--subheading-indent);
+  color: var(--subheading-color);
+}
+
+/* Only the first subheading is indented by an em of the heading size; the
+   rest fall back to an em of their own, as they do in the original. */
+.role + .role .role__title {
+  margin-left: var(--text-indent);
+}
+
+.text {
+  margin-left: var(--text-indent);
+  text-indent: var(--paragraph-indent);
+  color: var(--text-color);
+}
+
+.highlights {
+  margin-left: var(--text-indent);
+}
+
+.highlight {
+  text-indent: var(--paragraph-indent);
+}
+
+/* An en dash and an ordinary space: a no-break space is a hair wider in
+   DejaVu Serif Condensed, which is enough to change where lines break. */
+.highlight::before {
+  content: '\2013\20';
+}
+
+.entry__link {
+  margin-top: var(--link-gap);
+  font-family: var(--mono-font);
+  font-size: var(--link-size);
+  line-height: var(--link-leading);
+  color: var(--link-color);
+  text-align: right;
+  word-break: break-all;
+}
+
+/* An entry set flush right, as mdcv prints project blurbs. */
+.entry--right .text,
+.entry--right .highlight {
+  text-align: right;
+  text-indent: 0;
+}
+
+.entry--right .highlights,
+.entry--right .text {
+  margin-left: 0;
+}
+
+/* ---------------------------------------------------------------- rows -- */
+
+.rows {
+  margin-top: var(--rows-gap);
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6pt;
+  break-inside: avoid;
+}
+
+.row + .row {
+  margin-top: var(--row-gap);
+}
+
+.row__label {
+  color: var(--subheading-color);
+}
+
+.row__value {
+  flex: 0 0 auto;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+/* basics.summary, which mdcv has no slot for, set above the first section. */
+.lead {
+  margin-left: var(--text-indent);
+  margin-bottom: var(--paragraph-gap);
+  text-indent: var(--paragraph-indent);
+}
+
+/* --------------------------------------------------------------- links -- */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  font-family: var(--mono-font);
+  font-size: 0.92em;
+}
+
+/* -------------------------------------------------------------- screen -- */
+
+@media screen {
+  body {
+    background: #d8d8d8;
+    padding: 8mm 0;
+  }
+
+  /* Balanced rather than filled: on screen there is no next page to spill
+     onto, so a long resume grows the sheet instead of escaping it sideways. */
+  .columns {
+    column-fill: balance;
+    min-height: var(--column-height);
+  }
+
+  .resume {
+    width: var(--page-width);
+    min-height: var(--page-height);
+    margin: 0 auto;
+    padding-bottom: var(--page-margin);
+    background: #fff;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 35%);
+  }
+
+  a[href]:hover {
+    text-decoration: underline;
+  }
+}
+
+/* --------------------------------------------------------------- print -- */
+
+/* Page one starts at the paper edge so the masthead can bleed; later pages get
+   the 5mm the geometry package asks for. The foot is 3mm rather than 5mm — the
+   value of --page-foot, spelled out because @page cannot see custom properties
+   in every engine — because LaTeX lets the depth of the last line hang below
+   \textheight and a CSS column has to contain the whole line box. */
+@page {
+  size: A4;
+  margin: 5mm 0 3mm;
+}
+
+@page :first {
+  margin: 0 0 3mm;
+}
+
+@media print {
+  body {
+    background: none;
+  }
+
+  .resume {
+    width: auto;
+    min-height: 0;
+    box-shadow: none;
+  }
+}

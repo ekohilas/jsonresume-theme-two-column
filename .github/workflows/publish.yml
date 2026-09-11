@@ -1,0 +1,41 @@
+name: Publish
+
+# Publishes to npm when a GitHub release is created. Tag the release with the
+# version in package.json, e.g. v1.0.0, and set the NPM_TOKEN secret to an npm
+# automation token with publish rights.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Lets npm attach a provenance attestation to the published tarball.
+      id-token: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Check The Tarball Is Complete
+        run: node scripts/check-package.mjs
+
+      - name: Publish To npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
