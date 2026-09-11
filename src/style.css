@@ -161,11 +161,13 @@ body {
 
 /* flex-start rather than centred: .identity and .contacts set their own
    align-self and margin-top, so this only decides where the photo lands —
-   level with the name rather than floating in the middle of the band. */
+   level with the name rather than floating in the middle of the band.
+   The horizontal split is .identity's auto right margin rather than
+   space-between: with a photo in the row, space-between would put free space
+   on both sides of the name and float it away from the photo. */
 .masthead__top {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
 }
 
 /* column-fill: auto fills the left column to the foot of the page before
@@ -194,9 +196,9 @@ body {
   /* The same offset .identity uses, so the photo's top edge and the name's
      line box start together; 18mm is about the height of the name and label. */
   margin-top: var(--title-top);
-  /* Half what separates the name from the contacts: enough to read as its own
-     element, not so much that it drifts away from the name. */
-  padding-right: 6pt;
+  /* The same gap the masthead's padding leaves to the left of the photo, so it
+     sits with equal air on both sides. */
+  padding-right: var(--page-margin);
   object-fit: cover;
 }
 
@@ -204,6 +206,9 @@ body {
   align-self: flex-start;
   min-width: 0;
   margin-top: var(--title-top);
+  /* Takes all the slack, so the name stays against the photo and the contacts
+     are pushed to the far edge. */
+  margin-right: auto;
 }
 
 .identity__name {
