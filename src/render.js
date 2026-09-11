@@ -27,6 +27,25 @@ const inline = (value) =>
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
 
+/**
+ * basics.image is a URL rather than something the theme can inline: render has
+ * to stay pure, so it cannot fetch and base64 the file. The browser loads it,
+ * which is the one thing in the output that reaches the network. Restricted to
+ * http(s) and data:image so a resume cannot smuggle another scheme in here.
+ */
+const imageSrc = (url) => {
+  if (!url) return null
+  const value = String(url)
+  if (/^data:image\//i.test(value)) return escape(value)
+  try {
+    const { protocol } = new URL(value, 'https://example.invalid')
+    if (protocol !== 'http:' && protocol !== 'https:') return null
+  } catch {
+    return null
+  }
+  return escape(value)
+}
+
 const link = (url, content) => {
   const target = href(url)
   return target ? `<a href="${target}">${content}</a>` : content
@@ -108,8 +127,12 @@ const contactHtml = (contact) =>
     `<span class="contact__text">${escape(contact.text)}</span>`,
   )}<span class="contact__icon">${icon(contact.icon)}</span></li>`
 
-const mastheadHtml = (document) => `<header class="masthead">
+const mastheadHtml = (document) => {
+  const photo = imageSrc(document.image)
+  return `<header class="masthead">
+<div class="masthead__top">
 ${clean([
+  photo && `<img class="photo" src="${photo}" alt="">`,
   (document.name || document.label) &&
     `<div class="identity">
 ${document.name ? `<h1 class="identity__name">${escape(document.name)}</h1>` : ''}
@@ -118,7 +141,14 @@ ${document.label ? `<p class="identity__label">${escape(document.label)}</p>` : 
   document.contacts.length &&
     `<ul class="contacts">${document.contacts.map(contactHtml).join('')}</ul>`,
 ])}
+</div>
+${
+  document.summary
+    ? `<p class="masthead__summary">${inline(document.summary)}</p>`
+    : ''
+}
 </header>`
+}
 
 /** Colour overrides, keyed by the colour names the LaTeX theme defines. */
 const colorsCss = (document) => {
@@ -170,10 +200,7 @@ ${clean([colorsCss(document), contactsCss(document)])}
 <div class="resume">
 ${mastheadHtml(document)}
 <main class="columns">
-${clean([
-  document.summary && `<p class="lead">${inline(document.summary)}</p>`,
-  ...document.sections.map(sectionHtml),
-])}
+${clean(document.sections.map(sectionHtml))}
 </main>
 </div>
 </body>

@@ -16,13 +16,14 @@
  */
 
 :root {
-  /* Palette — mirrors the colours the LaTeX theme defines. */
+  /* Palette. The accent is black by default, which prints and photocopies
+     without surprises; meta['two-column'].colors takes it anywhere else. */
   --header-color: #eeeeee;
-  --title-color: #26ad60;
+  --title-color: #000000;
   --subtitle-color: #888888;
   --details-color: #000000;
-  --section-color: #26ad60;
-  --heading-color: #26ad60;
+  --section-color: #000000;
+  --heading-color: #000000;
   --subheading-color: #000000;
   --date-color: #888888;
   --text-color: #888888;
@@ -142,16 +143,31 @@ body {
   padding: 0 var(--page-margin);
 }
 
+/* Two rows: the photo, name and contacts across the top, then the summary
+   full width underneath. A minimum height rather than a fixed one, so with no
+   summary this is exactly the 24mm band and with one it grows. The rows start
+   at the top of the band, which is what keeps the name where the LaTeX
+   original put it whether or not anything follows. */
 .masthead {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12pt;
-  height: var(--header-height);
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: var(--header-height);
   margin: 0 calc(-1 * var(--page-margin)) var(--masthead-gap);
   padding: 0 var(--page-margin);
   background: var(--header-color);
   overflow: hidden;
+}
+
+/* flex-start rather than centred: .identity and .contacts set their own
+   align-self and margin-top, so this only decides where the photo lands —
+   level with the name rather than floating in the middle of the band.
+   The horizontal split is .identity's auto right margin rather than
+   space-between: with a photo in the row, space-between would put free space
+   on both sides of the name and float it away from the photo. */
+.masthead__top {
+  display: flex;
+  align-items: flex-start;
 }
 
 /* column-fill: auto fills the left column to the foot of the page before
@@ -167,10 +183,33 @@ body {
 
 /* ------------------------------------------------------------ masthead -- */
 
+/* basics.image, set to the left of the name. Square, to sit with the rules and
+   bands rather than against them; --photo-size takes it wherever you want. */
+.photo {
+  flex: 0 0 auto;
+  /* content-box against the reset's border-box: --photo-size stays the size of
+     the photo itself, and the padding below sits outside it rather than
+     cropping a square image into a rectangle. */
+  box-sizing: content-box;
+  width: var(--photo-size, 18mm);
+  height: var(--photo-size, 18mm);
+  /* The same offset .identity uses, so the photo's top edge and the name's
+     line box start together; 18mm is about the height of the name and label. */
+  margin-top: var(--title-top);
+  /* --photo-gap is the air around the photo: this to its right, and the same
+     value again as .masthead__summary's top margin, so the gap beside it and
+     the gap under it match. */
+  padding-right: var(--photo-gap, 5pt);
+  object-fit: cover;
+}
+
 .identity {
   align-self: flex-start;
   min-width: 0;
   margin-top: var(--title-top);
+  /* Takes all the slack, so the name stays against the photo and the contacts
+     are pushed to the far edge. */
+  margin-right: auto;
 }
 
 .identity__name {
@@ -190,6 +229,18 @@ body {
   color: var(--subtitle-color);
 }
 
+/* basics.summary, full width under both the name and the contacts. Nothing is
+   emitted without one, so the band keeps its exact 24mm for a resume that has
+   no summary to hold. */
+.masthead__summary {
+  /* The photo's own right-hand gap, so it has the same air below as beside. */
+  margin-top: var(--photo-gap, 5pt);
+  margin-bottom: var(--photo-gap, 5pt);
+  font-size: calc(9.5 * var(--tex-pt) * 1pt);
+  line-height: calc(11 * var(--tex-pt) * 1pt);
+  color: var(--details-color);
+}
+
 /* Hangs a little above the middle of the band, as the TikZ details node does.
    The offset and any size reduction are computed from the number of lines in
    src/render.js; the fallbacks here are the four-line case. */
@@ -197,6 +248,9 @@ body {
   flex: 0 0 auto;
   align-self: flex-start;
   margin-top: var(--details-top, 7.4pt);
+  /* What the row gap used to give. On .contacts rather than on the row so the
+     photo can sit flush against the name. */
+  margin-left: 12pt;
   font-family: var(--mono-font);
   font-size: var(--details-size, 11pt);
   line-height: var(--details-leading, 12pt);
@@ -377,13 +431,6 @@ body {
   flex: 0 0 auto;
   color: var(--text-color);
   white-space: nowrap;
-}
-
-/* basics.summary, which the LaTeX theme has no slot for, set above the first section. */
-.lead {
-  margin-left: var(--text-indent);
-  margin-bottom: var(--paragraph-gap);
-  text-indent: var(--paragraph-indent);
 }
 
 /* --------------------------------------------------------------- links -- */

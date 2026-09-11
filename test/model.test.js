@@ -25,10 +25,10 @@ test('an open period runs to Present, or to whatever meta says', () => {
   const open = { work: [{ name: 'A', startDate: '2024-01' }] }
   assert.equal(section(buildDocument(open), 'work').entries[0].date, '2024 - Present')
 
-  const renamed = { ...open, meta: { twoColumn: { present: 'Now' } } }
+  const renamed = { ...open, meta: { 'two-column': { present: 'Now' } } }
   assert.equal(section(buildDocument(renamed), 'work').entries[0].date, '2024 - Now')
 
-  const bare = { ...open, meta: { twoColumn: { present: '' } } }
+  const bare = { ...open, meta: { 'two-column': { present: '' } } }
   assert.equal(section(buildDocument(bare), 'work').entries[0].date, '2024')
 })
 
@@ -92,14 +92,14 @@ test('empty sections are dropped rather than drawn as a bare rule', () => {
   assert.deepEqual(titles(document), ['Education'])
 })
 
-test('meta.twoColumn overrides labels, order and contacts', () => {
+test('meta["two-column"] overrides labels, order and contacts', () => {
   const resume = {
     basics: { email: 'a@b.c', phone: '+61 400 000 000', url: 'https://example.com' },
     work: [{ name: 'A' }],
     education: [{ institution: 'B' }],
     projects: [{ name: 'C' }],
     meta: {
-      twoColumn: {
+      'two-column': {
         labels: { projects: 'Projects' },
         order: ['projects', 'work'],
         contacts: ['email'],
@@ -114,12 +114,18 @@ test('meta.twoColumn overrides labels, order and contacts', () => {
   )
 })
 
-test('meta["two-column"] is accepted as well, matching the theme slug', () => {
+test('the old meta.twoColumn spelling is not read', () => {
   const document = buildDocument({
     work: [{ name: 'A' }],
-    meta: { 'two-column': { labels: { work: 'Jobs' } } },
+    meta: { twoColumn: { labels: { work: 'Jobs' } } },
   })
-  assert.deepEqual(titles(document), ['Jobs'])
+  assert.deepEqual(titles(document), ['Work Experience'])
+})
+
+test('basics.image reaches the document, for the masthead photo', () => {
+  const image = 'https://example.com/me.png'
+  assert.equal(buildDocument({ basics: { image } }).image, image)
+  assert.equal(buildDocument({ basics: {} }).image, '')
 })
 
 test('contacts carry a usable href', () => {
