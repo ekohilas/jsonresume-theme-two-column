@@ -94,22 +94,42 @@ test('a photo is the one thing that can reach the network, and only over http(s)
   }
 })
 
-test('basics.summary is set under the name, inside the masthead', () => {
-  const html = render({ basics: { name: 'A', label: 'B', summary: 'Ran **things**.' } })
+test('basics.summary runs full width under the name and the contacts', () => {
+  const html = render({
+    basics: {
+      name: 'A',
+      label: 'B',
+      email: 'a@b.c',
+      summary: 'Ran **things**.',
+    },
+  })
   const masthead = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
-  assert.ok(masthead.includes('identity__summary'), 'the summary belongs to the masthead')
-  assert.ok(masthead.includes('Ran <strong>things</strong>.'), 'and keeps its markdown')
+  assert.ok(masthead.includes('Ran <strong>things</strong>.'), 'it keeps its markdown')
   assert.ok(!html.includes('<p class="lead">'), 'it no longer leads the columns')
-  // Order within the band: name, then label, then summary.
+
+  // It is a row of the masthead, not part of .identity: it follows the whole
+  // top row, contacts included, which is what puts it under both of them.
   const at = (c) => masthead.indexOf(c)
-  assert.ok(at('identity__name') < at('identity__label'))
-  assert.ok(at('identity__label') < at('identity__summary'))
+  assert.ok(at('masthead__top') < at('masthead__summary'))
+  assert.ok(at('identity__name') < at('masthead__summary'))
+  assert.ok(at('contacts') < at('masthead__summary'), 'it comes after the links')
+  assert.ok(at('</div>') < at('masthead__summary'), 'the top row is closed first')
+})
+
+test('the photo sits in the top row, level with the name', () => {
+  const html = render({
+    basics: { name: 'A', image: 'https://e.com/p.png', summary: 'S.' },
+  })
+  // From the markup, not the inlined stylesheet, which also names these classes.
+  const masthead = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
+  const top = masthead.slice(0, masthead.indexOf('masthead__summary'))
+  assert.ok(top.includes('class="photo"'), 'the photo belongs to the top row')
+  assert.ok(top.indexOf('class="photo"') < top.indexOf('identity__name'))
 })
 
 test('the masthead is untouched when there is no summary to hold', () => {
   const html = render({ basics: { name: 'A', label: 'B' } })
   const masthead = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
-  assert.ok(!masthead.includes('identity--with-summary'))
-  assert.ok(!masthead.includes('identity__summary'))
+  assert.ok(!masthead.includes('masthead__summary'))
   assert.match(masthead, /<div class="identity">/)
 })

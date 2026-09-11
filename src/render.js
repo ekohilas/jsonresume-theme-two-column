@@ -129,27 +129,24 @@ const contactHtml = (contact) =>
 
 const mastheadHtml = (document) => {
   const photo = imageSrc(document.image)
-  // The modifier only appears when there is a summary to make room for, so a
-  // resume without one lays out exactly as it did before the slot existed.
-  const identity = ['identity', document.summary && 'identity--with-summary']
-    .filter(Boolean)
-    .join(' ')
   return `<header class="masthead">
+<div class="masthead__top">
 ${clean([
   photo && `<img class="photo" src="${photo}" alt="">`,
-  (document.name || document.label || document.summary) &&
-    `<div class="${identity}">
+  (document.name || document.label) &&
+    `<div class="identity">
 ${document.name ? `<h1 class="identity__name">${escape(document.name)}</h1>` : ''}
 ${document.label ? `<p class="identity__label">${escape(document.label)}</p>` : ''}
-${
-  document.summary
-    ? `<p class="identity__summary">${inline(document.summary)}</p>`
-    : ''
-}
 </div>`,
   document.contacts.length &&
     `<ul class="contacts">${document.contacts.map(contactHtml).join('')}</ul>`,
 ])}
+</div>
+${
+  document.summary
+    ? `<p class="masthead__summary">${inline(document.summary)}</p>`
+    : ''
+}
 </header>`
 }
 

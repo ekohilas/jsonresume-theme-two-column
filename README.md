@@ -103,11 +103,12 @@ Two things follow from the original rather than from the schema:
   period with a start and no end reads `2024 - Present`; one that starts and
   ends in the same year collapses to a single year.
 
-The masthead holds `basics.image` as a square photo to the left of the name,
-then the name, `basics.label` under it, and `basics.summary` under that. Contact
-details sit on the right, drawn from `basics.email`, `phone`, `url`, `profiles`
-and `location`, each with a mark beside it; a `network` the theme does not
-recognise gets a generic link mark.
+The masthead is two rows. Across the top, `basics.image` as a square photo,
+level with the name and with `basics.label` under it, and the contact details
+flush right — drawn from `basics.email`, `phone`, `url`, `profiles` and
+`location`, each with a mark beside it; a `network` the theme does not
+recognise gets a generic link mark. Underneath both, running the full width of
+the band, `basics.summary`.
 
 The band is 24mm when it holds a name and contacts alone, and grows to fit a
 summary rather than clipping one. `--photo-size` (18mm) sizes the photo.

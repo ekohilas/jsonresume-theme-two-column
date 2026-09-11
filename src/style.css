@@ -143,18 +143,30 @@ body {
   padding: 0 var(--page-margin);
 }
 
+/* Two rows: the photo, name and contacts across the top, then the summary
+   full width underneath. A minimum height rather than a fixed one, so with no
+   summary this is exactly the 24mm band and with one it grows. The rows start
+   at the top of the band, which is what keeps the name where the LaTeX
+   original put it whether or not anything follows. */
 .masthead {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12pt;
-  /* A minimum rather than a fixed height: with no photo and no summary this
-     is exactly the 24mm band, and with either it grows instead of clipping. */
+  flex-direction: column;
+  justify-content: flex-start;
   min-height: var(--header-height);
   margin: 0 calc(-1 * var(--page-margin)) var(--masthead-gap);
   padding: 0 var(--page-margin);
   background: var(--header-color);
   overflow: hidden;
+}
+
+/* flex-start rather than centred: .identity and .contacts set their own
+   align-self and margin-top, so this only decides where the photo lands —
+   level with the name rather than floating in the middle of the band. */
+.masthead__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12pt;
 }
 
 /* column-fill: auto fills the left column to the foot of the page before
@@ -176,6 +188,9 @@ body {
   flex: 0 0 auto;
   width: var(--photo-size, 18mm);
   height: var(--photo-size, 18mm);
+  /* The same offset .identity uses, so the photo's top edge and the name's
+     line box start together; 18mm is about the height of the name and label. */
+  margin-top: var(--title-top);
   object-fit: cover;
 }
 
@@ -202,17 +217,12 @@ body {
   color: var(--subtitle-color);
 }
 
-/* basics.summary, set under the name inside the band. Only a resume that has
-   one gets the modifier, so the band is untouched without it. */
-.identity--with-summary {
-  flex: 1 1 auto;
-  padding-bottom: 4pt;
-}
-
-.identity__summary {
-  margin-top: 2.5pt;
-  margin-left: 1.7pt;
-  max-width: 118mm;
+/* basics.summary, full width under both the name and the contacts. Nothing is
+   emitted without one, so the band keeps its exact 24mm for a resume that has
+   no summary to hold. */
+.masthead__summary {
+  margin-top: 5pt;
+  margin-bottom: 5pt;
   font-size: calc(9.5 * var(--tex-pt) * 1pt);
   line-height: calc(11 * var(--tex-pt) * 1pt);
   color: var(--details-color);
