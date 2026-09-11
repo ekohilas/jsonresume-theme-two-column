@@ -166,7 +166,6 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12pt;
 }
 
 /* column-fill: auto fills the left column to the foot of the page before
@@ -186,11 +185,18 @@ body {
    bands rather than against them; --photo-size takes it wherever you want. */
 .photo {
   flex: 0 0 auto;
+  /* content-box against the reset's border-box: --photo-size stays the size of
+     the photo itself, and the padding below sits outside it rather than
+     cropping a square image into a rectangle. */
+  box-sizing: content-box;
   width: var(--photo-size, 18mm);
   height: var(--photo-size, 18mm);
   /* The same offset .identity uses, so the photo's top edge and the name's
      line box start together; 18mm is about the height of the name and label. */
   margin-top: var(--title-top);
+  /* Half what separates the name from the contacts: enough to read as its own
+     element, not so much that it drifts away from the name. */
+  padding-right: 6pt;
   object-fit: cover;
 }
 
@@ -235,6 +241,9 @@ body {
   flex: 0 0 auto;
   align-self: flex-start;
   margin-top: var(--details-top, 7.4pt);
+  /* What the row gap used to give. On .contacts rather than on the row so the
+     photo can sit flush against the name. */
+  margin-left: 12pt;
   font-family: var(--mono-font);
   font-size: var(--details-size, 11pt);
   line-height: var(--details-leading, 12pt);
