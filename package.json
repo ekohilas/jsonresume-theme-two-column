@@ -1,0 +1,51 @@
+{
+  "name": "jsonresume-theme-two-column",
+  "version": "0.1.0",
+  "description": "A dense two-column JSON Resume theme, ported from a two-column LaTeX CV theme",
+  "keywords": [
+    "jsonresume",
+    "jsonresume-theme",
+    "resume",
+    "cv",
+    "two-column",
+    "latex"
+  ],
+  "homepage": "https://github.com/ekohilas/jsonresume-theme-two-column#readme",
+  "bugs": {
+    "url": "https://github.com/ekohilas/jsonresume-theme-two-column/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekohilas/jsonresume-theme-two-column.git"
+  },
+  "license": "MIT",
+  "author": "Evan Kohilas",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "src",
+    "fonts",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build-assets.mjs",
+    "prepare": "node scripts/build-assets.mjs",
+    "render": "node scripts/render.mjs",
+    "test": "npm run build && node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@jsonresume/sample-data": "^0.2.1"
+  }
+}
