@@ -1,6 +1,6 @@
 {
   "name": "jsonresume-theme-two-column",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A dense two-column JSON Resume theme, ported from a two-column LaTeX CV theme",
   "keywords": [
     "jsonresume",

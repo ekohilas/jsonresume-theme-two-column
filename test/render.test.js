@@ -36,10 +36,10 @@ test('markdown cannot smuggle markup past the escaper', () => {
   assert.ok(html.includes('<strong>&lt;img'))
 })
 
-test('meta.twoColumn.colors overrides the palette, and only with colours', () => {
+test('meta["two-column"].colors overrides the palette, and only with colours', () => {
   const html = render({
     basics: { name: 'A' },
-    meta: { twoColumn: { colors: { section: '#205081', heading: 'url(evil)' } } },
+    meta: { 'two-column': { colors: { section: '#205081', heading: 'url(evil)' } } },
   })
   assert.ok(html.includes('--section-color: #205081;'))
   assert.ok(!html.includes('url(evil)'))
@@ -69,5 +69,47 @@ test('inlines the fonts, so a render needs no network', () => {
   const html = render({ basics: { name: 'A' } })
   assert.equal(html.match(/@font-face/g).length, 5)
   assert.ok(html.includes('src: url(data:font/woff2;base64,'))
-  assert.ok(!/<link\b/.test(html), 'the document should pull in nothing external')
+  assert.ok(!/<link\b|<script\b|<img\b/.test(html), 'nothing external without an image')
+})
+
+test('basics.image is set as a photo, to the left of the name', () => {
+  const html = render({
+    basics: { name: 'A', image: 'https://example.com/me.png' },
+  })
+  const masthead = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
+  assert.match(masthead, /<img class="photo" src="https:\/\/example\.com\/me\.png" alt="">/)
+  // Source order decides which side of the name it lands on.
+  assert.ok(masthead.indexOf('class="photo"') < masthead.indexOf('identity__name'))
+})
+
+test('a photo is the one thing that can reach the network, and only over http(s) or data:', () => {
+  for (const image of ['https://e.com/a.png', 'http://e.com/a.png', 'data:image/png;base64,AAA']) {
+    assert.match(render({ basics: { name: 'A', image } }), /<img class="photo"/)
+  }
+  for (const image of ['javascript:alert(1)', 'data:text/html,<script>', 'file:///etc/passwd']) {
+    assert.ok(
+      !/<img/.test(render({ basics: { name: 'A', image } })),
+      `${image} should not become a photo`,
+    )
+  }
+})
+
+test('basics.summary is set under the name, inside the masthead', () => {
+  const html = render({ basics: { name: 'A', label: 'B', summary: 'Ran **things**.' } })
+  const masthead = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
+  assert.ok(masthead.includes('identity__summary'), 'the summary belongs to the masthead')
+  assert.ok(masthead.includes('Ran <strong>things</strong>.'), 'and keeps its markdown')
+  assert.ok(!html.includes('<p class="lead">'), 'it no longer leads the columns')
+  // Order within the band: name, then label, then summary.
+  const at = (c) => masthead.indexOf(c)
+  assert.ok(at('identity__name') < at('identity__label'))
+  assert.ok(at('identity__label') < at('identity__summary'))
+})
+
+test('the masthead is untouched when there is no summary to hold', () => {
+  const html = render({ basics: { name: 'A', label: 'B' } })
+  const masthead = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
+  assert.ok(!masthead.includes('identity--with-summary'))
+  assert.ok(!masthead.includes('identity__summary'))
+  assert.match(masthead, /<div class="identity">/)
 })

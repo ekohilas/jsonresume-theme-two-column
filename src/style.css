@@ -16,13 +16,14 @@
  */
 
 :root {
-  /* Palette — mirrors the colours the LaTeX theme defines. */
+  /* Palette. The accent is black by default, which prints and photocopies
+     without surprises; meta['two-column'].colors takes it anywhere else. */
   --header-color: #eeeeee;
-  --title-color: #26ad60;
+  --title-color: #000000;
   --subtitle-color: #888888;
   --details-color: #000000;
-  --section-color: #26ad60;
-  --heading-color: #26ad60;
+  --section-color: #000000;
+  --heading-color: #000000;
   --subheading-color: #000000;
   --date-color: #888888;
   --text-color: #888888;
@@ -147,7 +148,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12pt;
-  height: var(--header-height);
+  /* A minimum rather than a fixed height: with no photo and no summary this
+     is exactly the 24mm band, and with either it grows instead of clipping. */
+  min-height: var(--header-height);
   margin: 0 calc(-1 * var(--page-margin)) var(--masthead-gap);
   padding: 0 var(--page-margin);
   background: var(--header-color);
@@ -166,6 +169,15 @@ body {
 }
 
 /* ------------------------------------------------------------ masthead -- */
+
+/* basics.image, set to the left of the name. Square, to sit with the rules and
+   bands rather than against them; --photo-size takes it wherever you want. */
+.photo {
+  flex: 0 0 auto;
+  width: var(--photo-size, 18mm);
+  height: var(--photo-size, 18mm);
+  object-fit: cover;
+}
 
 .identity {
   align-self: flex-start;
@@ -188,6 +200,22 @@ body {
   font-size: var(--subtitle-size);
   line-height: var(--heading-leading);
   color: var(--subtitle-color);
+}
+
+/* basics.summary, set under the name inside the band. Only a resume that has
+   one gets the modifier, so the band is untouched without it. */
+.identity--with-summary {
+  flex: 1 1 auto;
+  padding-bottom: 4pt;
+}
+
+.identity__summary {
+  margin-top: 2.5pt;
+  margin-left: 1.7pt;
+  max-width: 118mm;
+  font-size: calc(9.5 * var(--tex-pt) * 1pt);
+  line-height: calc(11 * var(--tex-pt) * 1pt);
+  color: var(--details-color);
 }
 
 /* Hangs a little above the middle of the band, as the TikZ details node does.
@@ -377,13 +405,6 @@ body {
   flex: 0 0 auto;
   color: var(--text-color);
   white-space: nowrap;
-}
-
-/* basics.summary, which the LaTeX theme has no slot for, set above the first section. */
-.lead {
-  margin-left: var(--text-indent);
-  margin-bottom: var(--paragraph-gap);
-  text-indent: var(--paragraph-indent);
 }
 
 /* --------------------------------------------------------------- links -- */

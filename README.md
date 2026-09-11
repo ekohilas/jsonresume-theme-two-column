@@ -64,7 +64,7 @@ box is sized by the stylesheet, and the masthead needs to bleed.
 
 ## How JSON Resume maps onto the layout
 
-Each section draws a list of entries. An entry has a green heading, a grey date
+Each section draws a list of entries. An entry has a black heading, a grey date
 flush right, one or more black subheadings, and grey body copy; summaries are
 set as plain paragraphs and highlights as en-dashed ones.
 
@@ -103,20 +103,29 @@ Two things follow from the original rather than from the schema:
   period with a start and no end reads `2024 - Present`; one that starts and
   ends in the same year collapses to a single year.
 
-`basics.summary`, if present, is set as a lead paragraph above the first
-section. Contact details are drawn from `basics.email`, `phone`, `url`,
-`profiles` and `location`, each with a mark to its right; a `network` the theme
-does not recognise gets a generic link mark.
+The masthead holds `basics.image` as a square photo to the left of the name,
+then the name, `basics.label` under it, and `basics.summary` under that. Contact
+details sit on the right, drawn from `basics.email`, `phone`, `url`, `profiles`
+and `location`, each with a mark beside it; a `network` the theme does not
+recognise gets a generic link mark.
+
+The band is 24mm when it holds a name and contacts alone, and grows to fit a
+summary rather than clipping one. `--photo-size` (18mm) sizes the photo.
+
+`basics.image` is the one thing in a rendered resume that is not inlined: it
+stays a URL, because `render` cannot fetch it without reaching the network, and
+a theme has to stay pure. Only `http(s)` and `data:image` are accepted. Inline
+your own `data:` URI if you want a resume that is genuinely one file.
 
 ## Options
 
-All optional, under `meta.twoColumn` (`meta["two-column"]` works too):
+All optional, under `meta["two-column"]`:
 
 ```json
 {
   "meta": {
     "theme": "two-column",
-    "twoColumn": {
+    "two-column": {
       "colors": { "section": "#205081", "heading": "#205081" },
       "labels": { "publications": "Talks", "projects": "Projects" },
       "order": ["work", "skills", "education", "publications"],
@@ -129,7 +138,7 @@ All optional, under `meta.twoColumn` (`meta["two-column"]` works too):
 
 | Key        | Meaning                                                                         |
 | ---------- | ------------------------------------------------------------------------------- |
-| `colors`   | Colour overrides, keyed by the colour names the LaTeX theme defines              |
+| `colors`   | Colour overrides — `title`, `section`, `heading` are the accent, black by default |
 | `labels`   | Section titles, keyed by JSON Resume section name                                |
 | `order`    | Which sections appear and in what order they flow through the columns            |
 | `contacts` | Which masthead details appear, from `email`, `phone`, `url`, `profiles`, `location` |

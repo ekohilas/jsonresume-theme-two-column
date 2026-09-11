@@ -264,7 +264,7 @@ const contactsOf = (basics, kinds) => {
 
 export const buildDocument = (resume = {}) => {
   const basics = resume.basics ?? {}
-  const options = resume.meta?.twoColumn ?? resume.meta?.['two-column'] ?? {}
+  const options = resume.meta?.['two-column'] ?? {}
   const labels = { ...DEFAULT_LABELS, ...options.labels }
   const order = nonEmpty(options.order).length ? options.order : DEFAULT_ORDER
   const contactKinds = nonEmpty(options.contacts).length
@@ -290,6 +290,7 @@ export const buildDocument = (resume = {}) => {
     name: basics.name ?? '',
     label: basics.label ?? '',
     summary: basics.summary ?? '',
+    image: basics.image ?? '',
     contacts: contactsOf(basics, contactKinds),
     sections,
     colors: options.colors ?? {},

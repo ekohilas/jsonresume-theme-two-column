@@ -1,7 +1,7 @@
 name: Publish
 
 # Publishes to npm when a GitHub release is created. Tag the release with the
-# version in package.json, e.g. v0.1.0, and set the NPM_TOKEN secret to an npm
+# version in package.json, e.g. v0.2.0, and set the NPM_TOKEN secret to an npm
 # automation token with publish rights.
 on:
   release:
