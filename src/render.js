@@ -120,7 +120,7 @@ ${document.label ? `<p class="identity__label">${escape(document.label)}</p>` : 
 ])}
 </header>`
 
-/** Colour overrides, keyed by the \definecolor names from the .sty file. */
+/** Colour overrides, keyed by the colour names the LaTeX theme defines. */
 const colorsCss = (document) => {
   const declarations = Object.entries(document.colors)
     .filter(([, value]) => /^#[0-9a-f]{3,8}$/i.test(String(value)))
@@ -129,7 +129,7 @@ const colorsCss = (document) => {
 }
 
 /**
- * mdcv sets the details block in 11/12 and hangs it a little above the middle
+ * The LaTeX theme sets the details block in 11/12 and hangs it a little above the middle
  * of the 24mm band. Both only work for a handful of lines, so the size is
  * scaled down once the block would outgrow the band, and the offset is derived
  * from whatever room is left.

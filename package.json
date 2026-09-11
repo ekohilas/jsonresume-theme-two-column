@@ -1,14 +1,13 @@
 {
   "name": "jsonresume-theme-two-column",
   "version": "1.0.0",
-  "description": "A dense two-column JSON Resume theme, ported from the mdcv two-column-cv LaTeX class",
+  "description": "A dense two-column JSON Resume theme, ported from a two-column LaTeX CV theme",
   "keywords": [
     "jsonresume",
     "jsonresume-theme",
     "resume",
     "cv",
     "two-column",
-    "mdcv",
     "latex"
   ],
   "homepage": "https://github.com/ekohilas/jsonresume-theme-two-column#readme",

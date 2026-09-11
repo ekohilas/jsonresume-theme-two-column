@@ -1,8 +1,8 @@
 # jsonresume-theme-two-column
 
-A dense, two-column [JSON Resume](https://jsonresume.org) theme: a port of the
-`two-column-cv` LaTeX class that [mdcv](https://github.com/ekohilas) renders
-with, reproduced closely enough that the two PDFs line up within about a point.
+A dense, two-column [JSON Resume](https://jsonresume.org) theme: a port of a
+two-column LaTeX CV theme, reproduced closely enough that the two PDFs line up
+within about a point.
 
 - A4, 5mm margins, a 24mm full-bleed masthead and two 272pt columns 8mm apart.
 - Oswald for the name and section headings, DejaVu Serif Condensed for body
@@ -88,7 +88,7 @@ set as plain paragraphs and highlights as en-dashed ones.
 | `languages` | `language`                | `fluency`  |
 | `interests` | `name`                    | `keywords` |
 
-The titles are the ones mdcv prints, which are more opinionated than the JSON
+The titles are the ones the LaTeX theme prints, which are more opinionated than the JSON
 Resume section names — `publications` is titled *Conference Talks*, `projects`
 is *Recent Personal Projects*. Override any of them with `labels` below.
 
@@ -129,7 +129,7 @@ All optional, under `meta.twoColumn` (`meta["two-column"]` works too):
 
 | Key        | Meaning                                                                         |
 | ---------- | ------------------------------------------------------------------------------- |
-| `colors`   | Colour overrides, keyed by the `\definecolor` names                              |
+| `colors`   | Colour overrides, keyed by the colour names the LaTeX theme defines              |
 | `labels`   | Section titles, keyed by JSON Resume section name                                |
 | `order`    | Which sections appear and in what order they flow through the columns            |
 | `contacts` | Which masthead details appear, from `email`, `phone`, `url`, `profiles`, `location` |
@@ -142,7 +142,7 @@ All optional, under `meta.twoColumn` (`meta["two-column"]` works too):
   enough for most lines; a subheading that TeX squeezed hard — say a talk title
   that filled the column to the last point — will wrap onto a second line here.
 - Long resumes paginate rather than reflow: the masthead only appears on the
-  first page, and the columns continue on the next, as `\twocolumn` does.
+  first page, and the columns continue on the next, as the LaTeX theme does.
 - On screen the columns balance instead of filling, so a resume that runs past
   one page grows the sheet rather than escaping it sideways. Print is unaffected.
 

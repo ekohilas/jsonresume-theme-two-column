@@ -1,6 +1,6 @@
 /**
  * Monochrome marks for the masthead contact list, standing in for the
- * FontAwesome glyphs mdcv sets after each detail line. Every path is drawn on
+ * FontAwesome glyphs the LaTeX theme sets after each detail line. Every path is drawn on
  * a 0 0 512 512 grid so the icons share one optical size.
  *
  * Brand marks (Font Awesome Free 6, CC BY 4.0) are reproduced as-is; the

@@ -1,9 +1,9 @@
 /**
- * Turns a JSON Resume document into the flat shape the mdcv layout draws:
+ * Turns a JSON Resume document into the flat shape the LaTeX theme draws:
  * a masthead plus an ordered list of sections, each holding either `entries`
  * (heading / date / roles) or `rows` (a label-value table, used for skills).
  *
- * The vocabulary mirrors two-column-cv.sty: an entry has a `heading` (green),
+ * The vocabulary mirrors the LaTeX theme: an entry has a `heading` (green),
  * a `date` (grey, flush right), one or more `subheading` lines (black) and
  * body `text` (grey).
  */
@@ -38,7 +38,7 @@ const nonEmpty = (value) => (Array.isArray(value) ? value.filter(Boolean) : [])
 
 const joinParts = (parts, separator = ', ') => nonEmpty(parts).join(separator)
 
-/** mdcv only ever prints years, whatever precision the source dates carry. */
+/** Only years are printed, whatever precision the source dates carry. */
 const year = (date) => {
   const match = /^\s*(\d{4})/.exec(String(date ?? ''))
   return match ? match[1] : null
@@ -103,7 +103,7 @@ const role = (subheading, text = [], url = null) => ({
   text: nonEmpty(text),
 })
 
-/** Summary first, then highlights as en-dashed paragraphs, as mdcv prints them. */
+/** Summary first, then highlights as en-dashed paragraphs, as the original prints them. */
 const body = (summary, highlights) => [
   ...(summary ? [{ text: summary }] : []),
   ...nonEmpty(highlights).map((highlight) => ({ text: highlight, bullet: true })),
@@ -196,7 +196,7 @@ const referencesSection = (references) =>
     roles: [role(null, body(reference.reference))],
   }))
 
-/** skills, languages and interests share one label-value table in mdcv. */
+/** skills, languages and interests share one label-value table in the LaTeX theme. */
 const skillRows = ({ skills = [], languages = [], interests = [] }) => [
   ...nonEmpty(skills).map((skill) => ({
     label: joinParts(skill.keywords) || skill.name,
@@ -228,7 +228,7 @@ const BUILDERS = {
   skills: (resume) => ({ rows: skillRows(resume) }),
 }
 
-/** Strip the scheme and any trailing slash, the way mdcv prints links. */
+/** Strip the scheme and any trailing slash, the way the LaTeX theme prints links. */
 export const displayUrl = (url) =>
   String(url ?? '')
     .replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')

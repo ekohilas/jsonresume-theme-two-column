@@ -1,7 +1,7 @@
 import { fontData } from './generated/fonts.js'
 
 /**
- * The three faces two-column-cv.sty asks for, inlined as data URIs so that a
+ * The three faces the LaTeX theme asks for, inlined as data URIs so that a
  * rendered resume is a single portable file. See fonts/README.md for how the
  * woff2 subsets are produced and what they are licensed under; the base64 is
  * baked into src/generated/fonts.js so nothing has to be read at render time.
