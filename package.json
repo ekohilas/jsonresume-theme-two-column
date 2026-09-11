@@ -44,7 +44,7 @@
     "build": "node scripts/build-assets.mjs",
     "prepare": "node scripts/build-assets.mjs",
     "render": "node scripts/render.mjs",
-    "test": "npm run build && node --test"
+    "test": "npm run build && node --test test/*.test.js"
   },
   "devDependencies": {
     "@jsonresume/sample-data": "^0.2.1"
