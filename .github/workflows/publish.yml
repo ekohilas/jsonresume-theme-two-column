@@ -1,8 +1,14 @@
 name: Publish
 
 # Publishes to npm when the version in package.json changes on main. Bump the
-# version in a normal commit or pull request; merging it is the release. Set the
-# NPM_TOKEN secret to an npm automation token with publish rights.
+# version in a normal commit or pull request; merging it is the release.
+#
+# Authentication is npm trusted publishing (OIDC), so there is no NPM_TOKEN to
+# rotate or leak. It needs configuring once on npmjs.com, under the package's
+# Settings -> Trusted Publisher: a GitHub Actions publisher for this repository
+# with workflow "publish.yml" and no environment. npm matches that triple
+# exactly against the run, so renaming or moving this file stops publishing
+# with an E404 that reads as if the package were missing.
 on:
   push:
     branches: [main]
@@ -18,6 +24,8 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       version: ${{ steps.probe.outputs.version }}
       publish: ${{ steps.probe.outputs.publish }}
@@ -53,18 +61,31 @@ jobs:
     permissions:
       # Pushes the v<version> tag and opens the matching GitHub release.
       contents: write
-      # Lets npm attach a provenance attestation to the published tarball.
+      # Mints the OIDC token npm trades for a short-lived publish credential,
+      # and signs the provenance attestation.
       id-token: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # v7 is the first setup-node that leaves OIDC alone: earlier versions
+      # write a placeholder _authToken into .npmrc whenever registry-url is
+      # set, which npm reads as "auth is configured" and never starts the token
+      # exchange, failing with ENEEDAUTH.
       - name: Set Up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
-          cache: npm
+          node-version: 24
           registry-url: https://registry.npmjs.org
+          # A poisoned dependency cache would run attacker code in the job
+          # holding the OIDC token, and this package has one small dev
+          # dependency, so the cache buys nothing worth that.
+          package-manager-cache: false
+
+      # Node 24 bundles an npm new enough, but which patch carries which npm
+      # shifts over time and publishing cannot be undone, so pin the floor.
+      - name: Ensure npm Supports Trusted Publishing
+        run: npm install --global npm@^11.5.1
 
       - name: Install Dependencies
         run: npm ci
@@ -75,10 +96,11 @@ jobs:
       - name: Check The Tarball Is Complete
         run: node scripts/check-package.mjs
 
+      # No NODE_AUTH_TOKEN: npm exchanges the Actions OIDC token for a
+      # short-lived credential by itself, and attaches provenance without
+      # being asked, so --provenance is redundant here too.
       - name: Publish To npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
 
       # Nothing else tags now that a release no longer drives the publish, so
       # the tag follows the publish rather than the other way around.
