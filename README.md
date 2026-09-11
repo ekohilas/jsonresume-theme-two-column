@@ -14,8 +14,19 @@ with, reproduced closely enough that the two PDFs line up within about a point.
 
 ### On the registry
 
-Point `meta.theme` at `two-column` in your `resume.json` and
-[registry.jsonresume.org](https://registry.jsonresume.org) will render it:
+Publishing to npm is necessary but not sufficient: the hosted registry renders
+only the themes it has been taught. It maps each slug to a static import in
+`apps/registry/lib/formatters/template/themeConfig.js` and carries the package
+as a dependency of `apps/registry/package.json`, where a good third of the
+themes are ordinary npm releases rather than packages kept in that monorepo.
+
+Ask for it with a 🎨 Theme Request issue on [jsonresume/jsonresume.org][repo],
+or open the pull request yourself — `themeConfig.js`,
+`packages/theme-config/src/metadata.js`, `apps/registry/package.json` and a
+changeset. The issue form requires confirming the theme does not touch the
+filesystem, which is what `src/generated/` below is for.
+
+Once it is registered:
 
 ```json
 {
@@ -24,6 +35,8 @@ Point `meta.theme` at `two-column` in your `resume.json` and
   }
 }
 ```
+
+[repo]: https://github.com/jsonresume/jsonresume.org
 
 ### From a CLI
 
@@ -144,10 +157,16 @@ npm run render -- path/to/resume.json
 
 `src/style.css` and `fonts/*.woff2` are the sources of truth;
 `scripts/build-assets.mjs` bakes both into `src/generated/` so that nothing is
-read from disk at render time. That matters for the registry, which imports
-themes into a Next.js build where a `.css` file belongs to the CSS pipeline and
-font files never reach the output directory. Re-run `npm run build` (or just
-`npm test`) after editing either.
+read from disk at render time. That is a hard requirement rather than a
+preference: [the theme development guide][dev] asks that `render` be pure and
+says not to import `fs` at all, and the registry's theme-request form makes it
+a checkbox you have to tick. It is also what lets the registry bundle the theme
+into its Next.js build, where a `.css` file would belong to the CSS pipeline and
+the woff2 subsets would never reach the output directory. A test fails if
+anything under `src/` reaches for the filesystem again. Re-run `npm run build`
+(or just `npm test`) after editing either.
+
+[dev]: https://jsonresume.org/theme-development
 
 `test/registry-gate.js` mirrors the gate the registry applies to every theme —
 render without crashing, leak no `[object Object]`/`undefined`/`NaN`, and draw
