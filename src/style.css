@@ -103,6 +103,12 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* The masthead band and the section rules are backgrounds, and the dates and
+     body text are a light grey. With "Background graphics" off, Chromium drops
+     the first and darkens the second to read on white; exact keeps both as
+     designed whatever the print dialog says. Inherited, so this covers the page. */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 body,
